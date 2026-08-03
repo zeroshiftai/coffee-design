@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 150" fill="none">
+  <defs>
+    <linearGradient id="cardGlass" x1="0" y1="0" x2="220" y2="150" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="chart" x1="30" y1="110" x2="190" y2="40" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C5CFF"/>
+      <stop offset="1" stop-color="#41D1FF"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-15%" y="-15%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <g filter="url(#cardShadow)">
+    <rect x="8" y="8" width="204" height="134" rx="22" fill="#0B1224" fill-opacity="0.72" stroke="url(#cardGlass)" stroke-width="1.5"/>
+    <rect x="8" y="8" width="204" height="134" rx="22" fill="url(#cardGlass)"/>
+    <circle cx="36" cy="36" r="8" fill="#7C5CFF"/>
+    <rect x="52" y="30" width="72" height="8" rx="4" fill="#fff" fill-opacity="0.7"/>
+    <rect x="52" y="44" width="48" height="6" rx="3" fill="#fff" fill-opacity="0.28"/>
+    <path d="M30 112 C55 108 70 70 95 78 C120 86 135 50 160 58 C175 62 185 70 192 78" stroke="url(#chart)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    <path d="M30 112 C55 108 70 70 95 78 C120 86 135 50 160 58 C175 62 185 70 192 78 V118 H30 Z" fill="url(#chart)" opacity="0.18"/>
+  </g>
+</svg>
