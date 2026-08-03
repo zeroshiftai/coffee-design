@@ -2,8 +2,16 @@
 @import 'lenis/dist/lenis.css';
 
 @theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+
+  --color-cream: #f7ecdb;
+  --color-sand: #e6cca8;
+  --color-latte: #c1996d;
+  --color-mocha: #9b7148;
+  --color-espresso: #2c1b10;
+  --color-gold: #b8853a;
+  --color-gold-light: #e0be7c;
 }
 
 @layer base {
@@ -18,23 +26,28 @@
   }
 
   html {
-    background: #05070f;
+    background: #e6cca8;
   }
 
   body {
     margin: 0;
     font-family: var(--font-sans);
     overflow-x: hidden;
-    background: #05070f;
-    color: #f4f6ff;
+    background: var(--color-cream);
+    color: var(--color-espresso);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
 
   ::selection {
-    background: color-mix(in oklab, var(--hero-accent, #7c5cff) 40%, transparent);
-    color: white;
+    background: color-mix(in oklab, var(--color-gold) 45%, transparent);
+    color: var(--color-espresso);
+  }
+
+  canvas {
+    display: block;
+    touch-action: pan-y;
   }
 }
 
@@ -42,27 +55,31 @@
   .font-display {
     font-family: var(--font-display);
   }
+}
 
-  .hero-accent-text {
-    background: linear-gradient(
-      120deg,
-      var(--hero-accent, #7c5cff) 0%,
-      var(--hero-accent-soft, #41d1ff) 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+/* Infinite gold marquee — the track holds two copies, so -50% loops seamlessly. */
+@keyframes marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
-/* GPU-friendly defaults for animated layers */
-.hero-bg,
-.hero-mockup,
-.hero-product,
-.hero-float-item,
-.smoke-puff {
-  backface-visibility: hidden;
-  transform: translateZ(0);
+.marquee-track {
+  animation: marquee-scroll 34s linear infinite;
+  will-change: transform;
+}
+
+/* SplitType line masks — overflow clip for rise reveals */
+.split-line-mask {
+  overflow: hidden;
+  display: block;
+}
+
+.split-line {
+  display: block;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -70,9 +87,7 @@
     scroll-behavior: auto;
   }
 
-  .hero-float-item,
-  .hero-product,
-  .smoke-puff {
-    animation: none !important;
+  .marquee-track {
+    animation: none;
   }
 }

@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Machine-local Claude Code permissions (absolute paths, not portable)
+.claude/settings.local.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

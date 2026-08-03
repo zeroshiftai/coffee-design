@@ -1,77 +1,84 @@
-# Lumina — Cinematic Hero System
+# Coffee Maison — WebGL Coffee Atelier
 
-A premium, Awwwards-inspired interactive hero built with **React**, **Vite**, **Tailwind CSS**, **GSAP + ScrollTrigger**, **Framer Motion**, and **Lenis**.
+A warm, luxury coffee landing page whose hero is a real **Three.js** scene: a
+double-wall glass latte mug floating over a cream podium, orbiting coffee beans,
+suspended ice, a milk pour, rising steam, and brushed-gold ribbons — all reacting to
+pointer and scroll.
 
-This is not a one-off animation. It’s a reusable multi-client stage:
+Built with **React 19**, **Vite**, **Tailwind CSS v4**, **React Three Fiber**, **drei**,
+**postprocessing**, **GSAP + ScrollTrigger**, and **Lenis**.
 
-- **Coffee theme (default)** — Instagram-reel cinematic stage: warm mockup behind a large cup, with scroll ritual (steam → milk → ice → sugar → beans)
-- **Agency theme** — website mockup with floating UI cards, cursors, analytics, and glow orbs
+## The scene ships with no 3D assets
 
-Swap assets + config to adapt the same motion system for jewelry, footwear, real estate, and more.
+Every mesh, material, and map in the hero is generated at runtime — there is no `.glb`,
+no HDRI, and no texture download. Nothing in the scene touches the network.
 
-## Features
+- **Glass mug** — a lathed double-wall profile (outer wall → rim → tapered inner cone)
+  rendered as one watertight solid with real `transmission`, plus a swept-tube handle.
+- **The latte** — a lathe filled to the surface line and vertex-coloured in macchiato
+  order: steamed milk at the base, caramel through the middle, espresso on top.
+- **Crema + rosetta** — drawn to a `<canvas>` with gradients and bezier leaves.
+- **Coffee beans** — a sphere squashed into an ellipsoid, then creased along the x=0
+  meridian with a gaussian valley; the groove is darkened via vertex colours. The whole
+  swarm is a single `InstancedMesh`.
+- **Gold ribbons & milk pour** — flat ribbons swept along Catmull-Rom curves using
+  Frenet frames, with per-`t` width taper and a twist that rolls the cross-section
+  around the tangent so they fold and catch light.
+- **Steam & gold dust** — GLSL point clouds. All motion lives in the vertex shader, so
+  the CPU only pushes a time uniform per frame.
+- **Environment** — a local cube map baked once from `<Lightformer>` cards (key, gold
+  rim, cool edge, ground bounce) instead of fetching a preset HDRI.
+- **Backdrop** — a camera-locked billboard that gives the transmission pass something
+  real to refract; without it the glass would bend empty alpha.
 
-- 7-layer cinematic depth composition
-- Mouse parallax with capped rotation and smooth interpolation
-- Unique GSAP floating idle animations per object (4s–12s)
-- Entrance choreography (~2s) including SplitText-style headline reveal
-- Scroll-driven depth (mockup recedes, product stays in focus)
-- Soft dynamic shadows, particles, and looping smoke
-- Responsive amplitude reduction and effect culling on mobile
-- Theme switcher demonstrating client-swappable configurations
+## Motion architecture
 
-## Stack
+Pointer and scroll are written imperatively into `src/lib/sceneState.ts` and read inside
+`useFrame`. Scrolling the hero never re-renders React — it only moves values the render
+loop already samples. `useHeroScroll` feeds ScrollTrigger progress into that same object.
 
-- React + TypeScript + Vite
-- Tailwind CSS v4
-- GSAP + ScrollTrigger
-- Framer Motion (particles / subtle motion only)
-- Lenis smooth scrolling
+Quality degrades automatically: phones and tablets get simpler transmission, fewer
+particles, and no post-processing, and drei's `PerformanceMonitor` drops a struggling
+desktop into the same tier. `prefers-reduced-motion` switches the canvas to
+`frameloop="demand"` and skips the entrance and pointer tracking entirely.
 
 ## Getting started
 
 ```bash
 npm install
+```
+
+```bash
 npm run dev
 ```
 
-Build:
-
 ```bash
 npm run build
-npm run preview
 ```
 
 ## Project structure
 
 ```text
 src/
-  components/hero/
-    Hero.tsx
-    FloatingObject.tsx
-    HeroProduct.tsx
-    WebsiteMockup.tsx
-    ParticleLayer.tsx
-    SmokeLayer.tsx
-    MouseParallax.tsx
-    HeroAnimations.tsx
-    SplitTextHeading.tsx
-  config/themes/
-    agency.ts
-    coffee.ts
-  hooks/
-    useLenis.ts
-    useMediaQuery.ts
-public/assets/
-  agency/
-  coffee/
+  components/scene/       WebGL layer
+    CoffeeCanvas.tsx      canvas, environment, lights, post-processing, quality tiers
+    Rig.tsx               pointer parallax + scroll dolly
+    GlassMug.tsx  Pedestal.tsx  Beans.tsx  IceCubes.tsx
+    GoldRibbons.tsx  MilkSwirl.tsx  Steam.tsx  GoldDust.tsx  Backdrop.tsx
+  components/site/        DOM layer
+    AnnouncementBar.tsx  SiteHeader.tsx  Hero.tsx  Marquee.tsx
+    CollectionSection.tsx  RitualSection.tsx  SiteFooter.tsx
+  components/motion/      Reveal + SplitHeading scroll reveals
+  lib/three/              geometry.ts, textures.ts — runtime generation
+  lib/sceneState.ts       pointer/scroll/entrance bridge
+  config/site.ts          all page copy
 ```
 
-## Adding a new client theme
+## Notes
 
-1. Drop transparent PNG/SVG assets into `public/assets/<client>/`
-2. Create `src/config/themes/<client>.ts` using the `ThemeConfig` type
-3. Register it in `src/config/themes/index.ts`
-4. Tune float depths, speeds, and scroll multipliers per object
-
-Every floating object supports unique position, depth, speed, rotation, delay, and amplitude — driven by arrays, not hardcoded JSX.
+- `useScrolledPast` uses an IntersectionObserver sentinel rather than a `scroll`
+  listener. Lenis moves the page programmatically, so native scroll events are not a
+  dependable signal.
+- Avoid putting `overflow` on a section that contains a `sticky` child — it silently
+  disables the stickiness. `RitualSection` clips its decorative glow in a nested
+  wrapper for this reason.

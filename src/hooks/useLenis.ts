@@ -5,6 +5,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
+/**
+ * Init Lenis once and drive it from GSAP's ticker so ScrollTrigger stays synced.
+ * Call from a top-level layout/provider only.
+ */
 export function useLenis(enabled = true) {
   useEffect(() => {
     if (!enabled) return

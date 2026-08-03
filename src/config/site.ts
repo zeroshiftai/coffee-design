@@ -1,0 +1,92 @@
+export const site = {
+  brand: {
+    name: 'COFFEE',
+    sub: 'MAISON',
+    tagline: 'Roastery & Atelier · Est. 1987',
+  },
+  announcements: [
+    'Complimentary shipping over $45',
+    'Roasted to order every Tuesday',
+    'Speak to a barista — 7am to 7pm',
+  ],
+  nav: [
+    { label: 'Home', href: '#home' },
+    { label: 'Origins', href: '#origins' },
+    { label: 'Collection', href: '#collection' },
+    { label: 'The Ritual', href: '#ritual' },
+    { label: 'Journal', href: '#journal' },
+  ],
+  hero: {
+    eyebrow: 'Luxury × Living',
+    headline: ['Luxing', 'Collecting'],
+    body: 'A single-origin reserve poured slow and served cold — micro-lot beans, cane sugar, and steamed milk suspended in one perfect moment.',
+    primaryCta: 'Order Online',
+    aside: {
+      label: 'Terms of Craft',
+      title: 'Served the way it was roasted',
+      body: 'Every glass is built to order: a double ristretto base, house-cultured milk, and ice pressed from filtered spring water.',
+      cta: 'Cart Now',
+    },
+    slides: ['Reserve Latte', 'Cold Brew No. 4', 'Gold Roast', 'Ice Affogato'],
+  },
+  marquee: [
+    'Single Origin',
+    'Slow Roasted',
+    'Micro Lot',
+    'Hand Poured',
+    'Small Batch',
+    'Cold Pressed',
+  ],
+  collection: {
+    eyebrow: 'The Collection',
+    title: 'Four blends, one obsession',
+    body: 'Each lot is cupped three times before it earns a place on the shelf. What survives is what you taste.',
+    items: [
+      {
+        name: 'Reserve Latte',
+        origin: 'Huila, Colombia',
+        note: 'Cocoa · Toffee · Cream',
+        price: '$24',
+        image: '/assets/coffee/cup-ceramic.png',
+      },
+      {
+        name: 'Cold Brew No. 4',
+        origin: 'Yirgacheffe, Ethiopia',
+        note: 'Jasmine · Citrus · Honey',
+        price: '$28',
+        image: '/assets/coffee/cup.png',
+      },
+      {
+        name: 'Gold Roast',
+        origin: 'Antigua, Guatemala',
+        note: 'Caramel · Almond · Fig',
+        price: '$26',
+        image: '/assets/coffee/bean.png',
+      },
+    ],
+  },
+  ritual: {
+    eyebrow: 'The Ritual',
+    title: 'Five minutes, start to finish',
+    body: 'The stage you scrolled through is the actual sequence our baristas follow. Nothing is rushed, nothing is improvised.',
+    steps: [
+      { title: 'Weigh', body: 'Eighteen grams, ground to order on a flat-burr grinder.' },
+      { title: 'Extract', body: 'A twenty-eight second ristretto pulled at nine bars.' },
+      { title: 'Texture', body: 'Milk stretched to sixty-two degrees — glossy, never foamed.' },
+      { title: 'Pour', body: 'A rosetta laid across the crema in a single unbroken line.' },
+    ],
+  },
+  stats: [
+    { value: '38', label: 'Origins sourced' },
+    { value: '1987', label: 'Roasting since' },
+    { value: '72h', label: 'Bean to cup' },
+  ],
+  footer: {
+    columns: [
+      { title: 'Shop', links: ['Whole Bean', 'Ground', 'Subscriptions', 'Gift Cards'] },
+      { title: 'Atelier', links: ['Our Story', 'Sourcing', 'Roastery Tours', 'Careers'] },
+      { title: 'Support', links: ['Shipping', 'Returns', 'Brew Guides', 'Contact'] },
+    ],
+    note: 'Built with React, Three.js, GSAP ScrollTrigger and Lenis.',
+  },
+}
