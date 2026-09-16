@@ -27,10 +27,13 @@ export function useLenis(enabled = true) {
     }
 
     gsap.ticker.add(ticker)
-    gsap.ticker.lagSmoothing(0)
+    // Keep default lag smoothing so a WebGL compile hitch doesn't make Lenis /
+    // ScrollTrigger try to "catch up" and feel like a jumpy load.
+    gsap.ticker.lagSmoothing(500, 33)
 
     return () => {
       gsap.ticker.remove(ticker)
+      gsap.ticker.lagSmoothing(500, 33)
       lenis.destroy()
     }
   }, [enabled])

@@ -21,11 +21,12 @@ export function Rig({ children, amplitude = 1 }: { children: ReactNode; amplitud
     // Push in slightly on scroll, pull back a touch during the intro.
     const targetX = sceneState.pointerX * 0.42 * amplitude
     const targetY = BASE_CAMERA.y + sceneState.pointerY * -0.26 * amplitude + scroll * 0.55
-    const targetZ = BASE_CAMERA.z + (1 - entrance) * 1.8 - scroll * 1.2
+    const targetZ = BASE_CAMERA.z + (1 - entrance) * 1.35 - scroll * 1.2
 
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, targetX, 2.6, delta)
-    camera.position.y = THREE.MathUtils.damp(camera.position.y, targetY, 2.6, delta)
-    camera.position.z = THREE.MathUtils.damp(camera.position.z, targetZ, 2.2, delta)
+    // Slightly softer damping so the cold-start settle doesn't feel twitchy.
+    camera.position.x = THREE.MathUtils.damp(camera.position.x, targetX, 2.1, delta)
+    camera.position.y = THREE.MathUtils.damp(camera.position.y, targetY, 2.1, delta)
+    camera.position.z = THREE.MathUtils.damp(camera.position.z, targetZ, 1.8, delta)
     camera.lookAt(0, 0.42 - scroll * 0.4, 0)
 
     const stage = group.current
@@ -33,13 +34,13 @@ export function Rig({ children, amplitude = 1 }: { children: ReactNode; amplitud
     stage.rotation.y = THREE.MathUtils.damp(
       stage.rotation.y,
       sceneState.pointerX * -0.09 * amplitude,
-      2.4,
+      2.0,
       delta,
     )
     stage.rotation.x = THREE.MathUtils.damp(
       stage.rotation.x,
       sceneState.pointerY * 0.05 * amplitude,
-      2.4,
+      2.0,
       delta,
     )
   })

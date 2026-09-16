@@ -22,15 +22,19 @@ type GlassMugProps = {
 export function GlassMug({ lowPower = false }: GlassMugProps) {
   const group = useRef<THREE.Group>(null)
 
-  const glassGeometry = useMemo(() => createGlassGeometry(lowPower ? 64 : 112), [lowPower])
+  const glassGeometry = useMemo(() => createGlassGeometry(lowPower ? 48 : 80), [lowPower])
   const liquidGeometry = useMemo(() => createLiquidGeometry(LIQUID_SURFACE), [])
-  const latteArt = useMemo(() => createLatteArtTexture(lowPower ? 384 : 768), [lowPower])
+  const latteArt = useMemo(() => createLatteArtTexture(lowPower ? 256 : 512), [lowPower])
 
   const handleGeometry = useMemo(() => createHandleGeometry(lowPower), [lowPower])
 
   useFrame((_, delta) => {
     const mesh = group.current
     if (!mesh) return
+
+    const reveal = THREE.MathUtils.smoothstep(sceneState.entrance, 0, 1)
+    // Soft scale-in so the hero product doesn't pop in on the first drawn frame.
+    mesh.scale.setScalar(0.86 + reveal * 0.14)
 
     // Slow turntable, nudged forward as the hero scrolls away.
     const target = 0.35 + sceneState.scroll * 1.5 + sceneState.pointerX * 0.14

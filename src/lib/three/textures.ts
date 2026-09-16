@@ -34,9 +34,10 @@ export function createLatteArtTexture(size = 768) {
   ctx.arc(c, c, c, 0, Math.PI * 2)
   ctx.fill()
 
-  // Micro-foam speckle.
+  // Micro-foam speckle — count scales with resolution so cold start stays cheap.
   ctx.globalAlpha = 0.06
-  for (let i = 0; i < 900; i++) {
+  const speckles = Math.round(180 + size * 0.35)
+  for (let i = 0; i < speckles; i++) {
     const angle = Math.random() * Math.PI * 2
     const radius = Math.sqrt(Math.random()) * c * 0.98
     ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#3a1d0c'

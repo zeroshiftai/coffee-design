@@ -1,5 +1,5 @@
-import { Suspense, useEffect, useState } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { Environment, Lightformer, PerformanceMonitor } from '@react-three/drei'
 import { Bloom, EffectComposer, Vignette } from '@react-three/postprocessing'
 import * as THREE from 'three'
@@ -17,6 +17,26 @@ import { MilkSwirl } from './MilkSwirl'
 import { Pedestal } from './Pedestal'
 import { Rig } from './Rig'
 import { Steam } from './Steam'
+
+/**
+ * Waits for a few drawn frames while the canvas stays at opacity 0.
+ * Avoids a sync `gl.compile()` spike — that was a big source of refresh-time cuts.
+ */
+function WarmUp({ onReady }: { onReady: () => void }) {
+  const frames = useRef(0)
+  const done = useRef(false)
+
+  useFrame(() => {
+    if (done.current) return
+    frames.current += 1
+    // Let the first couple of pipeline-building frames finish off-screen.
+    if (frames.current < 6) return
+    done.current = true
+    window.setTimeout(onReady, 0)
+  })
+
+  return null
+}
 
 /** Local HDRI stand-in: emissive cards captured into a cube map, no network fetch. */
 function StudioEnvironment() {
@@ -64,7 +84,16 @@ function StudioEnvironment() {
   )
 }
 
-function Stage({ lowPower, compact }: { lowPower: boolean; compact: boolean }) {
+function Stage({
+  lowPower,
+  compact,
+  enhanced,
+}: {
+  lowPower: boolean
+  compact: boolean
+  /** Heavier extras mount after the first fade-in so refresh compile is smaller. */
+  enhanced: boolean
+}) {
   return (
     <>
       <ambientLight intensity={0.3} color="#fff1dd" />
@@ -87,8 +116,8 @@ function Stage({ lowPower, compact }: { lowPower: boolean; compact: boolean }) {
             <GlassMug lowPower={lowPower} />
             <Steam lowPower={lowPower} />
           </group>
-          <Beans count={lowPower ? 9 : 18} />
-          <IceCubes lowPower={lowPower} />
+          <Beans count={lowPower ? 9 : 16} />
+          {enhanced && <IceCubes lowPower={lowPower} />}
         </group>
         <GoldDust lowPower={lowPower} />
       </Rig>
@@ -104,28 +133,46 @@ export function CoffeeCanvas() {
   const { isMobile, isTablet } = useBreakpoint()
   const prefersReducedMotion = usePrefersReducedMotion()
   const [degraded, setDegraded] = useState(false)
+  const [ready, setReady] = useState(false)
+  const [enhanced, setEnhanced] = useState(false)
 
   const lowPower = isMobile || isTablet || degraded
   // Layout-only flag: a degraded desktop still keeps the wide composition.
   const compact = isMobile
 
+  const handleReady = useCallback(() => setReady(true), [])
+
+  // Entrance only after shaders have warmed — avoids animating through a hitch.
   useEffect(() => {
     if (prefersReducedMotion) {
       sceneState.entrance = 1
+      setReady(true)
+      setEnhanced(true)
+      return
+    }
+
+    if (!ready) {
+      sceneState.entrance = 0
       return
     }
 
     sceneState.entrance = 0
     const tween = gsap.to(sceneState, {
       entrance: 1,
-      duration: 2.4,
-      delay: 0.15,
-      ease: 'power2.out',
+      duration: 2.8,
+      ease: 'power3.out',
     })
     return () => {
       tween.kill()
     }
-  }, [prefersReducedMotion])
+  }, [ready, prefersReducedMotion])
+
+  // Ice + bloom after the mug is already fading in — splits the compile hitch.
+  useEffect(() => {
+    if (!ready || prefersReducedMotion) return
+    const id = window.setTimeout(() => setEnhanced(true), 700)
+    return () => window.clearTimeout(id)
+  }, [ready, prefersReducedMotion])
 
   useEffect(() => {
     if (prefersReducedMotion) return
@@ -148,28 +195,35 @@ export function CoffeeCanvas() {
   }, [prefersReducedMotion])
 
   return (
-    <Canvas
-      dpr={[1, lowPower ? 1.5 : 2]}
-      frameloop={prefersReducedMotion ? 'demand' : 'always'}
-      camera={{ fov: 34, near: 0.1, far: 60, position: [0, 1.85, 11] }}
-      gl={{
-        alpha: true,
-        antialias: false,
-        powerPreference: 'high-performance',
-        toneMapping: THREE.NeutralToneMapping,
-        toneMappingExposure: 0.94,
-      }}
+    <div
+      className={`h-full w-full transition-opacity duration-[1100ms] ease-out ${
+        ready ? 'opacity-100' : 'opacity-0'
+      }`}
     >
-      <PerformanceMonitor onDecline={() => setDegraded(true)} />
-      <Suspense fallback={null}>
-        <Stage lowPower={lowPower} compact={compact} />
-        {!lowPower && (
-          <EffectComposer multisampling={4} enableNormalPass={false}>
-            <Bloom intensity={0.32} luminanceThreshold={0.95} luminanceSmoothing={0.22} mipmapBlur />
-            <Vignette offset={0.16} darkness={0.62} />
-          </EffectComposer>
-        )}
-      </Suspense>
-    </Canvas>
+      <Canvas
+        dpr={[1, lowPower ? 1.25 : 1.6]}
+        frameloop={prefersReducedMotion ? 'demand' : 'always'}
+        camera={{ fov: 34, near: 0.1, far: 60, position: [0, 1.85, 11] }}
+        gl={{
+          alpha: true,
+          antialias: false,
+          powerPreference: 'high-performance',
+          toneMapping: THREE.NeutralToneMapping,
+          toneMappingExposure: 0.94,
+        }}
+      >
+        <PerformanceMonitor onDecline={() => setDegraded(true)} />
+        <Suspense fallback={null}>
+          <Stage lowPower={lowPower} compact={compact} enhanced={enhanced} />
+          {enhanced && !lowPower && (
+            <EffectComposer multisampling={0} enableNormalPass={false}>
+              <Bloom intensity={0.28} luminanceThreshold={0.95} luminanceSmoothing={0.22} mipmapBlur />
+              <Vignette offset={0.16} darkness={0.62} />
+            </EffectComposer>
+          )}
+          <WarmUp onReady={handleReady} />
+        </Suspense>
+      </Canvas>
+    </div>
   )
 }

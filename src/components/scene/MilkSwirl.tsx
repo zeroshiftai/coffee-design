@@ -18,7 +18,7 @@ export function MilkSwirl({ lowPower = false }: { lowPower?: boolean }) {
     const curve = createMilkSwirlCurve()
     return createRibbonGeometry(
       curve,
-      lowPower ? 90 : 200,
+      lowPower ? 72 : 120,
       (t) => 0.04 + Math.sin(t * Math.PI) ** 0.75 * 0.21,
       (t) => -0.5 + t * Math.PI * 1.6,
     )

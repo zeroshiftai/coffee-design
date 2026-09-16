@@ -29,11 +29,42 @@ export function Hero() {
   const asideRef = useRef<HTMLDivElement>(null)
   const beansRef = useRef<HTMLDivElement>(null)
   const [slide, setSlide] = useState(0)
+  // WebGL mounts only after the copy entrance has room to breathe — otherwise
+  // refresh-time shader compile steals frames from GSAP and feels like cuts.
+  const [mountStage, setMountStage] = useState(false)
   const prefersReducedMotion = usePrefersReducedMotion()
 
   useHeroScroll(sectionRef)
 
-  // Entrance choreography — copy rises while the 3D stage settles in behind it.
+  // Prefetch the Three.js chunk immediately, but delay mounting until the
+  // headline animation is underway so parse/compile doesn't hitch the refresh.
+  useEffect(() => {
+    void import('@/components/scene/CoffeeCanvas')
+
+    let cancelled = false
+    let idleId: number | undefined
+
+    const mount = () => {
+      if (!cancelled) setMountStage(true)
+    }
+
+    const delayMs = prefersReducedMotion ? 0 : 950
+    const timeoutId = window.setTimeout(() => {
+      if (typeof window.requestIdleCallback === 'function') {
+        idleId = window.requestIdleCallback(mount, { timeout: 350 })
+      } else {
+        mount()
+      }
+    }, delayMs)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timeoutId)
+      if (idleId !== undefined) window.cancelIdleCallback(idleId)
+    }
+  }, [prefersReducedMotion])
+
+  // Entrance choreography — copy rises first; the 3D stage mounts afterward.
   useEffect(() => {
     if (prefersReducedMotion) return
 
@@ -43,23 +74,23 @@ export function Hero() {
       timeline
         .from('[data-hero-line]', {
           yPercent: 118,
-          duration: 1.15,
-          stagger: 0.09,
+          duration: 1.25,
+          stagger: 0.1,
         })
         .from(
           '[data-hero-fade]',
-          { opacity: 0, y: 26, duration: 1, stagger: 0.08 },
-          '-=0.75',
+          { opacity: 0, y: 22, duration: 1.05, stagger: 0.09 },
+          '-=0.7',
         )
         .from(
           '[data-hero-aside]',
-          { opacity: 0, x: 40, duration: 1.05 },
-          '-=0.85',
+          { opacity: 0, x: 32, duration: 1.15 },
+          '-=0.8',
         )
         .from(
           '[data-hero-bean]',
-          { opacity: 0, scale: 0.75, duration: 1.4, stagger: 0.1 },
-          '-=1.1',
+          { opacity: 0, scale: 0.82, duration: 1.5, stagger: 0.12 },
+          '-=1',
         )
     }, sectionRef)
 
@@ -103,9 +134,11 @@ export function Hero() {
       {/* r3f sets position:relative inline on its own wrapper, so the stage gets
           its own absolutely-positioned host instead of a className override. */}
       <div className="absolute inset-0 z-0">
-        <Suspense fallback={null}>
-          <CoffeeCanvas />
-        </Suspense>
+        {mountStage && (
+          <Suspense fallback={null}>
+            <CoffeeCanvas />
+          </Suspense>
+        )}
       </div>
 
       {/* Depth haze so the DOM copy separates from the 3D stage. */}

@@ -12,7 +12,7 @@ export function GoldRibbons({ lowPower = false }: { lowPower?: boolean }) {
   const group = useRef<THREE.Group>(null)
 
   const ribbons = useMemo(() => {
-    const segments = lowPower ? 90 : 220
+    const segments = lowPower ? 72 : 140
     return createGoldRibbonCurves().map(({ curve, width, twist }) =>
       createRibbonGeometry(curve, segments, width, twist),
     )
